@@ -1,15 +1,8 @@
 Procyon lotor (North American Raccoon)
-Procyon cancrivorus (crab-eating raccoon)
-Bassaricyon alleni (Allen’s olingo)
 Bassaricyon gabbii (Bushy-tailed olingo)
-Bassaricyon neblina (Olinguito)
-Bassaricyon medius (Western lowland olingo)
 Bassariscus astutus (Ringtail)
-Bassariscus sumichrasti (cacomistle)
 Nasua narica (White-nosed coati)
 Nasua nasua (South American coati)
-Nasuella meridensis (Eastern mountain coati) *
-Nasuella olivacea (Western mountain coati)
 Mustela altaica (Mountain weasel)
 Pteronura brasiliensis (Giant otter)
 Potos flavus (Kinkajou)
@@ -23,5 +16,4 @@ Tremarctos ornatus (Spectacled bear)
 Ursus maritimus (Polar bear)
 Acinonyx jubatus (Cheetah)
 Caracal caracal (Caracal)
-
 

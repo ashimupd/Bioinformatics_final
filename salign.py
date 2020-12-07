@@ -202,14 +202,14 @@ In other words finds out which variable has the maximum value between 'diag', 'u
 @return 3: if 'left' has the maximum value
 ''' 
 def direction_finder(diag, up, left):
-   
-   if diag > up:
-       if diag > left: return 1 # diag is greater than up and left both
-       else: return 3           # diag is greater than up but less than left so left is the greatest
-   else:
-        if up > left: return 2  # up is greater than diag and left both
-        else: return 3          # up is greater than diag, but less than left so left us the greatest.
- 
+    
+    if diag > up and diag > left: # if diag is greater than up and left both, then return 1 because value came from diagonal
+        return 1
+    elif up > diag & up > left:   # if up is greater than diag and left both, then return 2
+        return 2
+    else:                         # else return 3 which means left is greater
+        return 3
+
 '''
 This function calculates the alignment score taking into consideration the affine gap penalty model
 The alignment score is taken as an estimation of evolutionary distances.
