@@ -1,6 +1,6 @@
 '''
 This is a dictionary of dictionary holding the values as it would be in BLOSUM62 substitution matrix.
-This substiution matrix along with affine gap penalties is the basis of our scoring model
+This substiution matrix along with affine gap penalties is the basis of our scoring model.
 '''
 blosum62 = {
 'C':{'C':9, 'S':-1, 'T':-1, 'P':-3, 'A':0,  'G':-3, 'N':-3, 'D':-3, 'E':-4, 'Q':-3, 'H':-3, 'R':-3, 'K':-3, 'M':-1, 'I':-1, 'L':-1, 'V':-1, 'F':-2, 'Y':-2, 'W':-2},
