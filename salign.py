@@ -211,81 +211,36 @@ def direction_finder(diag, up, left):
         return 3
 
 '''
-This function calculates the alignment score taking into consideration the affine gap penalty model
-The alignment score is taken as an estimation of evolutionary distances.
-This means an introduction of gap is penalized heavily than an extension of gap
-@param g: gap initiation penalty 
-@param r: gap extension penalty
-@param sequences: a list of list containing two aligned sequences.
-@return score: total alignment score calculated between two sequences which is taken as an estimate of evolutionary distance.
+This function calculates the distance between two aligned sequences
+The distance can be taken as an estimation of evolutionary distances. 
+@param align1: aligned sequence 1
+@param align2: aligned sequence 2 
+@return score: proportions of sites that differ between the two sequences
 '''
-def affine_gap_score_align(align1, align2, g, r):
-    aa_compared = 0.0 # number of residue compared excluding gap
-    score = 0.0 # stores the final alignment score
-    # Intially, in gap tracker for both sequence will be false 
-    seq1_in_gap = False
-    seq2_in_gap = False
-    # after alignment both will have equal lengths
+def distance(align1, align2):
+    dist = 0.0 # holds the count for number of aa that differ
+    # loop till the end of alinged sequence 1
+    # The length of aligned sequence 1 and aligned sequence 2 will always be equal
     for i in range(len(align1)):
-        if align1[i] == '-':
-        # If gap is encountered, lets check if we are already inside gap or not
-            if seq1_in_gap: # if we are already inside a gap, then only assign gap extension penalty
-                            # The gap extension penalty is 'r' in our case
-                score = score + r
-            else: # if we are not inside gap, after this we will be.
-                  # Because this line is reached only after we encounter a gap
-                  # Set seq1_in_gap to true
-                  # assign a gap initiation penalty 'g' because this is where gap was introduced  
-                score = score + g
-                seq1_in_gap = True
-        
-        # We repeat same thing for alignment 2
-        # Remember the length of two alignments are always equal
-        elif align2[i] == '-':
-             # If gap is encountered, lets check if we are already inside gap or not
-            if seq2_in_gap: # if we are already inside a gap, then only assign gap extension penalty
-                            # The gap extension penalty is 'r' in our case
-                score = score + r
-            else: # if we are not inside gap, after this we will be 
-                  # Because this line is reached only after we encounter a gap
-                  # Set seq1_in_gap to true
-                  # assign a gap initiation penalty 'g' because this is where gap was introduced  
-                score = score + g
-                seq2_in_gap = True
-        
-        # Now we handle the scoring for non-gap cases. We make the use of 'BlOSUM62' matrix for penalizing the mismatches-
-        # in the final alignment scoring as well
-        # The below line is reached only when we are not inside gap.
-        # Therefore we set the gap tracker to False
-        
-        else:
-            if seq1_in_gap:
-                seq1_in_gap = False
-            if seq1_in_gap:
-                seq2_in_gap = False
-            # Reaching this line means, there is aa in both sequences at this position and not gap.
-            # We are counting the number of times non-gap comparison is made between the aligned sequences.
-            aa_compared = aa_compared + 1
-            
-            # Each match between aa in aligned sequences contributes +1 to the score
-            if align1[i] == align2[i]:
-                score = score + 1       
-    return round((1.0 - (score/aa_compared)), 4) # return the score upto 3 decimal precision
+        # if two sequences differ at column i then add 1 to the distance counter
+        if align1[i] != align2[i]:
+            dist = dist + 1
+    return round (dist/len(align1), 3) # returns the distance upto 3rd precision.
 
 '''
 This is a helper function that returns the evolutionary distance estimate between the sequences-
-by taking two sequences
+after aligning them.
 @param seq1: protein sequence 1
 @param seq2: protein sequence 2
 @param g: gap initiation penalty
 @param r: gap extension penalty
 @return p_dist: pairwise distance
 '''
-def pairwise_distance(seq1, seq2, g, r):
+def pairwise_distance(seq1, seq2, g):
     score, trace = seq_align(seq1, seq2, g) # this will return a score matrix and a traceback matrix
     align1, align2 = trace_back(score, trace, seq1, seq2) # this will do the traceback and return two aligned sequences
-    p_dist = affine_gap_score_align(align1, align2, g, r) # this will return the pairwise distance between two sequences
-    return p_dist # pairwise distance between two sequences is returned
+    p_dist = distance(align1, align2) # this will return the distance between two aligned sequences
+    return p_dist # pairwise distance between two aligned sequences is returned
 
 '''
 Creates a matrix of pairwise distances between sequences after thay have been aligned
@@ -294,7 +249,7 @@ Creates a matrix of pairwise distances between sequences after thay have been al
 @param r: gap extension penalty
 @return distance_matrix: A matrix of pairwise distance between sequences
 '''
-def create_distance_matrix(file, g, r):
+def create_distance_matrix(file, g):
     # reads sequences from the file and stores in a list of lists 
     # The 1st element of each inner list is the name of sequence 
     # The 2nd element of each inner list is the sequence itself 
@@ -313,11 +268,11 @@ def create_distance_matrix(file, g, r):
         # Also selects one sequence from the "file" one at a time
         for j in range (i+1, len(sequences)):           
             # calling the pairwise_distance function 
-            p_dist = pairwise_distance(sequences[i][1], sequences[j][1], g, r)
+            p_dist = pairwise_distance(sequences[i][1], sequences[j][1], g)
             # appending the distance to the temporary list
             temp_dist_list.append(p_dist)
             
-        temp_dist_list[i] = 0
+        temp_dist_list[i] = 0.00
         # appending the temp list to the final list
         distance_matrix.append(temp_dist_list)
     return distance_matrix  
@@ -325,10 +280,10 @@ def create_distance_matrix(file, g, r):
 '''
      In the order it is found in sequences_cytb.txt
 
-     distance_matrix =          Gene1   Gene2   Gene3   .....
-                         Gene1  0         9       6    .....
-                         Gene2  -         0       7    .....
-                         Gene3  -         -       0    .....                           
+     distance_matrix =          Gene1   Gene2   Gene3  .    .   .   .   .
+                         Gene1  0         9       6    .    .   .   .   .
+                         Gene2  -         0       7    .    .   .   .   .
+                         Gene3  -         -       0    .    .   .   .   .                           
 '''
 '''
 A helper function that will display the distance matrix in a formatted way for the eye
@@ -346,21 +301,10 @@ def main():
     
     # Code takes some time to run with number alignments goining on
     
-    gap = -4  # gap initiation penalty
-    affine_gap = -2 # gap extension penalty
-    ''' 
-    seq1 = "KTNIRKTHPLAKIVNNSFIDLPTPSNISAWWNFGSLLGICLLLQIATGLFLAMHYTPDTTTAFSSVTHICRDVNYGWIIRYMHANGASMFFMCLFLHVGRGLYYGSYTFSETWNIGVILLLTVMATAFMGYVLPWGQMSFWGATVITNLLSAIPYIGSNLVEWIWGGFSVDKATLTRFFAFHFILPFIITTLAMIHLLFLHETGSNNPAGITSESDKIPFHPYYTIKDILGILFLIFMLMGLVLFTPDLLGDPDNYTPANPLNTPPHIKPEWYFLFAYAILRSIPNKLGGVLALVLSILILIIIPLLHTSKQRSMMFRPLSQCLFWFLVADLLVLTWIGGQPVEYPFIIIGQLASIFYFMILLVLMPTMNIIENNLLKW"
-    seq2 = "KTNIRKTHPLAKIVNNSFIDLPTPSNISAWWNFGSLLGICLLLQIATGLFLAMHYTPDTTTAFSSVTHICRDVNYGWIIRYMHANGASMFFMCLFLHVGRGLYYGSYTFSETWNIGVILLLTVMATAFMGYVLPWGQMSFWGATVITNLLSAIPYIGSNLVEWIWGGFSVDKATLTRFFAFHFILPFIITTLAMIHLLFLHETGSNNPAGITSESDKIPFHPYYTIKDILGILFLIFMLMGLVLFTPDLLGDPDNYTPANPLNTPPHIKPEWYFLFAYAILRSIPNKLGGVLALVLSILILIIIPLLHTSKQRSMMFRPLSQCLFWFLVADLLVLTWIGGQPVEYPFIIIGQLASIFYFMILLVLMPTMNIIENNLLKW"
-    s ,t = seq_align(seq1,seq2,gap)
-    a1,a2= trace_back(s,t,seq1,seq2)
-    print(a1)
-    print(a2)
-    d = pairwise_distance(seq1,seq2,gap,affine_gap)
-    print(d)    
-    '''
+    gap = -8  # gap penalty
     # use this matrix as an input to Neighbor Joining
-    dmatrix = create_distance_matrix("sequences_cytb.txt", gap, affine_gap)
-    # distances are rounded to 4th percision. If more precision is required can be changed in affine_gap_score_align(...) function
+    dmatrix = create_distance_matrix("sequences_cytb.txt", gap)
+    
     print("\n")
     print("--------Printing Distance Matrix--------------------")
     print("\n")
