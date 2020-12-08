@@ -308,13 +308,16 @@ def create_distance_matrix(file, g, r):
         # for example, in first iteration, 'temp_dist_list' will contain the distance between itself and all-
         # the other sequences.
         temp_dist_list = []
-
+        for k in range (i+1):
+            temp_dist_list.append("-")
         # Also selects one sequence from the "file" one at a time
-        for case in sequences:           
+        for j in range (i+1, len(sequences)):           
             # calling the pairwise_distance function 
-            p_dist = pairwise_distance(case[1], sequences[i][1], g, r)
+            p_dist = pairwise_distance(sequences[i][1], sequences[j][1], g, r)
             # appending the distance to the temporary list
             temp_dist_list.append(p_dist)
+            
+        temp_dist_list[i] = 0
         # appending the temp list to the final list
         distance_matrix.append(temp_dist_list)
     return distance_matrix  
@@ -324,8 +327,8 @@ def create_distance_matrix(file, g, r):
 
      distance_matrix =          Gene1   Gene2   Gene3   .....
                          Gene1  0         9       6    .....
-                         Gene2  9         0       7    .....
-                         Gene3  6         7       0    .....                           
+                         Gene2  -         0       7    .....
+                         Gene3  -         -       0    .....                           
 '''
 '''
 A helper function that will display the distance matrix in a formatted way for the eye
@@ -358,9 +361,17 @@ def main():
     # use this matrix as an input to Neighbor Joining
     dmatrix = create_distance_matrix("sequences_cytb.txt", gap, affine_gap)
     # distances are rounded to 4th percision. If more precision is required can be changed in affine_gap_score_align(...) function
+    print("\n")
+    print("--------Printing Distance Matrix--------------------")
+    print("\n")
     
     display_formatted(dmatrix) # display pairwise distance matrix in a way that could be seen by eyes.
-   
+    
+    print("\n")
+    
+    print("-----------Starting Neighbor Joining----------------")
+
+    print("\n")
    
 if __name__ == '__main__':
     main()
